@@ -58,9 +58,9 @@ MP_REGISTER_ROOT_POINTER(struct _esp32_pcnt_obj_t *esp32_pcnt_obj_head);
 
 // Once off installation of the PCNT ISR service (using the default service).
 // Persists across soft reset.
-STATIC bool pcnt_isr_service_installed = false;
+static bool pcnt_isr_service_installed = false;
 
-STATIC mp_obj_t esp32_pcnt_deinit(mp_obj_t self_in);
+static mp_obj_t esp32_pcnt_deinit(mp_obj_t self_in);
 
 void esp32_pcnt_deinit_all(void) {
     esp32_pcnt_obj_t **pcnt = &MP_STATE_PORT(esp32_pcnt_obj_head);
@@ -70,7 +70,7 @@ void esp32_pcnt_deinit_all(void) {
     }
 }
 
-STATIC void esp32_pcnt_init_helper(esp32_pcnt_obj_t *self, size_t n_pos_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+static void esp32_pcnt_init_helper(esp32_pcnt_obj_t *self, size_t n_pos_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     enum {
         ARG_channel,
         ARG_pin,
@@ -225,7 +225,7 @@ STATIC void esp32_pcnt_init_helper(esp32_pcnt_obj_t *self, size_t n_pos_args, co
 }
 
 // Disable any events, and remove the ISR handler for this unit.
-STATIC void esp32_pcnt_disable_events_for_unit(esp32_pcnt_obj_t *self) {
+static void esp32_pcnt_disable_events_for_unit(esp32_pcnt_obj_t *self) {
     if (!self->irq) {
         return;
     }
@@ -241,7 +241,7 @@ STATIC void esp32_pcnt_disable_events_for_unit(esp32_pcnt_obj_t *self) {
     self->irq->trigger = 0;
 }
 
-STATIC mp_obj_t esp32_pcnt_make_new(const mp_obj_type_t *type, size_t n_pos_args, size_t n_kw_args, const mp_obj_t *args) {
+static mp_obj_t esp32_pcnt_make_new(const mp_obj_type_t *type, size_t n_pos_args, size_t n_kw_args, const mp_obj_t *args) {
     if (n_pos_args < 1) {
         mp_raise_TypeError(MP_ERROR_TEXT("id"));
     }
@@ -289,19 +289,19 @@ STATIC mp_obj_t esp32_pcnt_make_new(const mp_obj_type_t *type, size_t n_pos_args
     return MP_OBJ_FROM_PTR(self);
 }
 
-STATIC void esp32_pcnt_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind) {
+static void esp32_pcnt_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind) {
     esp32_pcnt_obj_t *self = MP_OBJ_TO_PTR(self_in);
     mp_printf(print, "PCNT(%u)", self->unit);
 }
 
-STATIC mp_obj_t esp32_pcnt_init(size_t n_pos_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+static mp_obj_t esp32_pcnt_init(size_t n_pos_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     esp32_pcnt_obj_t *self = MP_OBJ_TO_PTR(pos_args[0]);
     esp32_pcnt_init_helper(self, n_pos_args - 1, pos_args + 1, kw_args);
     return mp_const_none;
 }
-STATIC MP_DEFINE_CONST_FUN_OBJ_KW(esp32_pcnt_init_obj, 1, esp32_pcnt_init);
+static MP_DEFINE_CONST_FUN_OBJ_KW(esp32_pcnt_init_obj, 1, esp32_pcnt_init);
 
-STATIC mp_obj_t esp32_pcnt_deinit(mp_obj_t self_in) {
+static mp_obj_t esp32_pcnt_deinit(mp_obj_t self_in) {
     esp32_pcnt_obj_t *self = MP_OBJ_TO_PTR(self_in);
 
     // Remove IRQ and events.
@@ -333,9 +333,9 @@ STATIC mp_obj_t esp32_pcnt_deinit(mp_obj_t self_in) {
 
     return mp_const_none;
 }
-STATIC MP_DEFINE_CONST_FUN_OBJ_1(esp32_pcnt_deinit_obj, esp32_pcnt_deinit);
+static MP_DEFINE_CONST_FUN_OBJ_1(esp32_pcnt_deinit_obj, esp32_pcnt_deinit);
 
-STATIC mp_obj_t esp32_pcnt_value(size_t n_args, const mp_obj_t *pos_args) {
+static mp_obj_t esp32_pcnt_value(size_t n_args, const mp_obj_t *pos_args) {
     esp32_pcnt_obj_t *self = MP_OBJ_TO_PTR(pos_args[0]);
 
     // Optionally use pcnt.value(True) to clear the counter but only support a
@@ -369,9 +369,9 @@ STATIC mp_obj_t esp32_pcnt_value(size_t n_args, const mp_obj_t *pos_args) {
 
     return MP_OBJ_NEW_SMALL_INT(value);
 }
-STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(esp32_pcnt_value_obj, 1, 2, esp32_pcnt_value);
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(esp32_pcnt_value_obj, 1, 2, esp32_pcnt_value);
 
-STATIC mp_uint_t esp32_pcnt_irq_trigger(mp_obj_t self_in, mp_uint_t new_trigger) {
+static mp_uint_t esp32_pcnt_irq_trigger(mp_obj_t self_in, mp_uint_t new_trigger) {
     esp32_pcnt_obj_t *self = MP_OBJ_TO_PTR(self_in);
     self->irq->trigger = new_trigger;
     for (pcnt_evt_type_t evt_type = PCNT_EVT_THRES_1; evt_type <= PCNT_EVT_ZERO; evt_type <<= 1) {
@@ -384,7 +384,7 @@ STATIC mp_uint_t esp32_pcnt_irq_trigger(mp_obj_t self_in, mp_uint_t new_trigger)
     return 0;
 }
 
-STATIC mp_uint_t esp32_pcnt_irq_info(mp_obj_t self_in, mp_uint_t info_type) {
+static mp_uint_t esp32_pcnt_irq_info(mp_obj_t self_in, mp_uint_t info_type) {
     esp32_pcnt_obj_t *self = MP_OBJ_TO_PTR(self_in);
     if (info_type == MP_IRQ_INFO_FLAGS) {
         // Atomically get-and-clear the flags.
@@ -399,12 +399,12 @@ STATIC mp_uint_t esp32_pcnt_irq_info(mp_obj_t self_in, mp_uint_t info_type) {
     return 0;
 }
 
-STATIC const mp_irq_methods_t esp32_pcnt_irq_methods = {
+static const mp_irq_methods_t esp32_pcnt_irq_methods = {
     .trigger = esp32_pcnt_irq_trigger,
     .info = esp32_pcnt_irq_info,
 };
 
-STATIC IRAM_ATTR void esp32_pcnt_intr_handler(void *arg) {
+static IRAM_ATTR void esp32_pcnt_intr_handler(void *arg) {
     esp32_pcnt_obj_t *self = (esp32_pcnt_obj_t *)arg;
     pcnt_unit_t unit = self->unit;
     uint32_t status;
@@ -415,7 +415,7 @@ STATIC IRAM_ATTR void esp32_pcnt_intr_handler(void *arg) {
     mp_irq_handler(&self->irq->base);
 }
 
-STATIC mp_obj_t esp32_pcnt_irq(size_t n_pos_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+static mp_obj_t esp32_pcnt_irq(size_t n_pos_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     enum { ARG_handler, ARG_trigger };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_handler,  MP_ARG_OBJ,  {.u_obj = mp_const_none} },
@@ -460,23 +460,23 @@ STATIC mp_obj_t esp32_pcnt_irq(size_t n_pos_args, const mp_obj_t *pos_args, mp_m
 
     return MP_OBJ_FROM_PTR(self->irq);
 }
-STATIC MP_DEFINE_CONST_FUN_OBJ_KW(esp32_pcnt_irq_obj, 1, esp32_pcnt_irq);
+static MP_DEFINE_CONST_FUN_OBJ_KW(esp32_pcnt_irq_obj, 1, esp32_pcnt_irq);
 
-STATIC mp_obj_t esp32_pcnt_start(mp_obj_t self_in) {
+static mp_obj_t esp32_pcnt_start(mp_obj_t self_in) {
     esp32_pcnt_obj_t *self = MP_OBJ_TO_PTR(self_in);
     check_esp_err(pcnt_counter_resume(self->unit));
     return mp_const_none;
 }
-STATIC MP_DEFINE_CONST_FUN_OBJ_1(esp32_pcnt_start_obj, esp32_pcnt_start);
+static MP_DEFINE_CONST_FUN_OBJ_1(esp32_pcnt_start_obj, esp32_pcnt_start);
 
-STATIC mp_obj_t esp32_pcnt_stop(mp_obj_t self_in) {
+static mp_obj_t esp32_pcnt_stop(mp_obj_t self_in) {
     esp32_pcnt_obj_t *self = MP_OBJ_TO_PTR(self_in);
     check_esp_err(pcnt_counter_pause(self->unit));
     return mp_const_none;
 }
-STATIC MP_DEFINE_CONST_FUN_OBJ_1(esp32_pcnt_stop_obj, esp32_pcnt_stop);
+static MP_DEFINE_CONST_FUN_OBJ_1(esp32_pcnt_stop_obj, esp32_pcnt_stop);
 
-STATIC const mp_rom_map_elem_t esp32_pcnt_locals_dict_table[] = {
+static const mp_rom_map_elem_t esp32_pcnt_locals_dict_table[] = {
     // Methods
     { MP_ROM_QSTR(MP_QSTR_init),            MP_ROM_PTR(&esp32_pcnt_init_obj) },
     { MP_ROM_QSTR(MP_QSTR_value),           MP_ROM_PTR(&esp32_pcnt_value_obj) },
@@ -499,7 +499,7 @@ STATIC const mp_rom_map_elem_t esp32_pcnt_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_IRQ_MIN),         MP_ROM_INT(PCNT_EVT_L_LIM) },
     { MP_ROM_QSTR(MP_QSTR_IRQ_MAX),         MP_ROM_INT(PCNT_EVT_H_LIM) },
 };
-STATIC MP_DEFINE_CONST_DICT(esp32_pcnt_locals_dict, esp32_pcnt_locals_dict_table);
+static MP_DEFINE_CONST_DICT(esp32_pcnt_locals_dict, esp32_pcnt_locals_dict_table);
 
 MP_DEFINE_CONST_OBJ_TYPE(
     esp32_pcnt_type,
