@@ -47,7 +47,7 @@ if hasattr(esp32, "PCNT"):
 
             if not hasattr(self, "_pcnt"):
                 # New instance, or previously deinit-ed.
-                self._pcnt = self._PCNT(unit_id, min=-_PCNT_RANGE, max=_PCNT_RANGE)
+                self._pcnt = self._PCNT(unit_id, min=-_PCNT_RANGE, max=_PCNT_RANGE, value=0)
             elif not (args or kwargs):
                 # Existing instance, and no args, so accessing the existing
                 # singleton without reconfiguring. Note: This means that
@@ -63,7 +63,6 @@ if hasattr(esp32, "PCNT"):
             # Common unit configuration.
             self._pcnt.init(
                 filter=min(max(0, filter_ns * 80 // 1000), 1023),
-                value=0,
             )
 
             # Note: We track number-of-overflows rather than the actual count in
