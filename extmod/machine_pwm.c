@@ -45,6 +45,7 @@ static mp_obj_t mp_machine_pwm_duty_get_u16(machine_pwm_obj_t *self);
 static void mp_machine_pwm_duty_set_u16(machine_pwm_obj_t *self, mp_int_t duty_u16);
 static mp_obj_t mp_machine_pwm_duty_get_ns(machine_pwm_obj_t *self);
 static void mp_machine_pwm_duty_set_ns(machine_pwm_obj_t *self, mp_int_t duty_ns);
+static void mp_machine_pwm_hpoint_set(machine_pwm_obj_t *self, mp_int_t hpoint);
 
 // The port provides implementations of the above in this file.
 #include MICROPY_PY_MACHINE_PWM_INCLUDEFILE
@@ -125,6 +126,17 @@ static mp_obj_t machine_pwm_duty_ns(size_t n_args, const mp_obj_t *args) {
 }
 static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(machine_pwm_duty_ns_obj, 1, 2, machine_pwm_duty_ns);
 
+// PWM.hpoint(value)
+static mp_obj_t machine_pwm_hpoint(size_t n_args, const mp_obj_t *args) {
+    machine_pwm_obj_t *self = MP_OBJ_TO_PTR(args[0]);
+    if (n_args == 2) {
+        mp_int_t hpoint = mp_obj_get_int(args[1]);
+        mp_machine_pwm_hpoint_set(self, hpoint);
+    }
+    return mp_const_none;
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(machine_pwm_hpoint_obj, 1, 2, machine_pwm_hpoint);
+
 static const mp_rom_map_elem_t machine_pwm_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_init), MP_ROM_PTR(&machine_pwm_init_obj) },
     { MP_ROM_QSTR(MP_QSTR_deinit), MP_ROM_PTR(&machine_pwm_deinit_obj) },
@@ -134,6 +146,7 @@ static const mp_rom_map_elem_t machine_pwm_locals_dict_table[] = {
     #endif
     { MP_ROM_QSTR(MP_QSTR_duty_u16), MP_ROM_PTR(&machine_pwm_duty_u16_obj) },
     { MP_ROM_QSTR(MP_QSTR_duty_ns), MP_ROM_PTR(&machine_pwm_duty_ns_obj) },
+    { MP_ROM_QSTR(MP_QSTR_hpoint), MP_ROM_PTR(&machine_pwm_hpoint_obj) },
 };
 static MP_DEFINE_CONST_DICT(machine_pwm_locals_dict, machine_pwm_locals_dict_table);
 

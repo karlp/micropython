@@ -85,6 +85,7 @@ typedef struct _machine_pwm_obj_t {
     int8_t duty_scale; // DUTY_10 if duty(), DUTY_16 if duty_u16(), DUTY_NS if duty_ns()
     int duty_ui;       // saved values of UI duty
     int channel_duty;  // saved values of UI duty, calculated to raw channel->duty
+    int hpoint;        // passed in raw hpoint, units? what units?
     bool output_invert;
     bool output_invert_prev;
 } machine_pwm_obj_t;
@@ -249,16 +250,17 @@ static void apply_duty(machine_pwm_obj_t *self) {
             .intr_type = LEDC_INTR_DISABLE,
             .speed_mode = self->mode,
             .timer_sel = self->timer,
-            .hpoint = 0,
+            .hpoint = self->hpoint,
             .flags.output_invert = self->output_invert,
         };
+        //printf("(re)configured hpoint: %d", self->hpoint);
         check_esp_err(ledc_channel_config(&cfg));
         reconfigure_pin(self);
     } else {
         #if FADE
         check_esp_err(ledc_set_duty_and_update(self->mode, self->channel, self->channel_duty, 0));
         #else
-        check_esp_err(ledc_set_duty(self->mode, self->channel, self->channel_duty));
+        check_esp_err(ledc_set_duty_with_hpoint(self->mode, self->channel, self->channel_duty, self->hpoint));
         check_esp_err(ledc_update_duty(self->mode, self->channel));
         #endif
     }
@@ -348,6 +350,11 @@ static void check_duty_ns(machine_pwm_obj_t *self, int ns) {
 
 static void set_duty_ns(machine_pwm_obj_t *self, int ns) {
     check_duty_ns(self, ns);
+    apply_duty(self);
+}
+
+static void set_hpoint(machine_pwm_obj_t *self, int hpoint) {
+    self->hpoint = hpoint;
     apply_duty(self);
 }
 
@@ -587,6 +594,9 @@ static void mp_machine_pwm_print(const mp_print_t *print, mp_obj_t self_in, mp_p
         if (self->lightsleep) {
             mp_printf(print, ", lightsleep=True");
         }
+        if (self->hpoint) {
+            mp_printf(print, ", hpoint=%d", self->hpoint);
+        }
         mp_printf(print, ")");
 
         #if MICROPY_ERROR_REPORTING > MICROPY_ERROR_REPORTING_NORMAL
@@ -785,4 +795,8 @@ static mp_obj_t mp_machine_pwm_duty_get_ns(machine_pwm_obj_t *self) {
 
 static void mp_machine_pwm_duty_set_ns(machine_pwm_obj_t *self, mp_int_t duty_ns) {
     set_duty_ns(self, duty_ns);
+}
+
+static void mp_machine_pwm_hpoint_set(machine_pwm_obj_t *self, mp_int_t hpoint) {
+    set_hpoint(self, hpoint);
 }
